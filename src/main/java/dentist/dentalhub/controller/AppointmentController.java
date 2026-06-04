@@ -1,4 +1,4 @@
 package dentist.dentalhub.controller;
 
-public class dentistController {
+public class AppointmentController {
 }

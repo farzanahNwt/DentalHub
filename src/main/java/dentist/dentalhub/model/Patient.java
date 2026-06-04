@@ -1,4 +1,4 @@
 package dentist.dentalhub.model;
 
-public class patient {
+public class Patient {
 }

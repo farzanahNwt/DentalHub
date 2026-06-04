@@ -1,4 +1,4 @@
 package dentist.dentalhub.repository;
 
-public class adminRepository {
+public class PatientRepository {
 }

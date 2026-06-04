@@ -1,4 +1,4 @@
 package dentist.dentalhub.service;
 
-public class patientService {
+public class DentistService {
 }
