@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dentist Dashboard - DentalHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f0eb;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 220px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            padding: 28px 16px;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-logo { font-size: 22px; font-weight: 700; color: #0d3d8f; margin-bottom: 32px; padding-left: 8px; }
+
+        .sidebar-profile {
+            display: flex; align-items: center; gap: 10px;
+            background: #f5f0eb; border-radius: 0.75rem;
+            padding: 10px; margin-bottom: 28px;
+        }
+
+        .sidebar-profile .avatar {
+            width: 38px; height: 38px; border-radius: 50%;
+            background-color: #0d3d8f;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 600; font-size: 14px; flex-shrink: 0;
+        }
+
+        .sidebar-profile .profile-info .name { font-size: 13px; font-weight: 600; color: #1c1b1b; }
+        .sidebar-profile .profile-info .role { font-size: 11px; color: #6b7280; }
+
+        .nav-label {
+            font-size: 11px; font-weight: 600; color: #9ca3af;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            padding: 0 8px; margin-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 0.6rem;
+            font-size: 14px; font-weight: 500; color: #6b7280;
+            text-decoration: none; margin-bottom: 2px;
+            transition: background 0.15s, color 0.15s;
+        }
+        .nav-item:hover { background: #f5f0eb; color: #1c1b1b; }
+        .nav-item.active { background: #0d3d8f; color: #ffffff; }
+        .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .sidebar-bottom { margin-top: auto; }
+        .nav-item.logout { color: #b91c1c; }
+        .nav-item.logout:hover { background: #fef2f2; }
+
+        /* ── Main ── */
+        .main { margin-left: 220px; flex: 1; padding: 36px 32px; display: flex; flex-direction: column; min-height: 100vh; }
+
+        .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+        .topbar h1 { font-size: 26px; font-weight: 700; color: #1c1b1b; }
+        .topbar p  { font-size: 14px; color: #6b7280; margin-top: 4px; }
+
+        /* ── Stats row ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: #ffffff;
+            border-radius: 1.25rem;
+            padding: 22px 24px;
+        }
+
+        .stat-card .stat-label { font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+        .stat-card .stat-value { font-size: 32px; font-weight: 700; color: #1c1b1b; }
+        .stat-card.blue { background: #0d3d8f; }
+        .stat-card.blue .stat-label { color: rgba(255,255,255,0.7); }
+        .stat-card.blue .stat-value { color: #ffffff; }
+
+        /* ── Table card ── */
+        .table-card { background: #ffffff; border-radius: 1.25rem; padding: 24px; margin-bottom: 28px; }
+
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-header h2 { font-size: 18px; font-weight: 600; color: #1c1b1b; }
+        .section-header a  { font-size: 13px; color: #0056b3; font-weight: 500; text-decoration: none; }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            font-size: 11px; font-weight: 600; color: #9ca3af;
+            text-transform: uppercase; letter-spacing: 0.07em;
+            padding: 0 12px 12px; text-align: left;
+        }
+        tbody td { padding: 14px 12px; font-size: 14px; color: #374151; border-top: 1px solid #f3f4f6; }
+        tbody tr:hover { background: #fafafa; }
+
+        /* Status pills */
+        .status-pill { display: inline-block; padding: 3px 10px; border-radius: 2rem; font-size: 12px; font-weight: 600; }
+        .status-pending   { background: #fef9c3; color: #854d0e; }
+        .status-confirmed { background: #dcfce7; color: #166534; }
+        .status-completed { background: #dbeafe; color: #1e40af; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+        /* Status update form inline */
+        .status-select {
+            padding: 5px 10px; border: 1.5px solid #e5e7eb; border-radius: 0.5rem;
+            font-size: 13px; font-family: 'Inter', sans-serif; background: #fafafa;
+            cursor: pointer; outline: none;
+        }
+        .btn-update {
+            padding: 5px 12px; background: #0d3d8f; color: white;
+            border: none; border-radius: 0.5rem;
+            font-size: 12px; font-weight: 600; cursor: pointer;
+            font-family: 'Inter', sans-serif; margin-left: 6px;
+        }
+        .btn-update:hover { background: #0a3070; }
+
+        .empty-row td { text-align: center; color: #9ca3af; padding: 32px; }
+
+        /* ── Footer ── */
+        footer {
+            margin-top: auto; padding: 20px 0;
+            border-top: 1px solid #e5e7eb;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 12px; color: #9ca3af;
+        }
+        footer .footer-links { display: flex; gap: 20px; }
+        footer .footer-links a { color: #9ca3af; text-decoration: none; }
+        footer .footer-links a:hover { color: #6b7280; }
+    </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+    <div class="sidebar-logo">DentalHub</div>
+
+    <div class="sidebar-profile">
+        <div class="avatar" th:text="${dentist != null and dentist.fullName != null} ? ${#strings.substring(dentist.fullName, 0, 1)} : 'D'">D</div>
+        <div class="profile-info">
+            <div class="name" th:text="${dentist != null} ? ${dentist.fullName} : 'Dentist'">Dr. Name</div>
+            <div class="role" th:text="${dentist != null} ? ${dentist.specialization} : 'Dentist'">General Dentistry</div>
+        </div>
+    </div>
+
+    <div class="nav-label">Menu</div>
+
+    <a th:href="@{/dentists/dashboard}" class="nav-item active">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+    </a>
+
+    <div class="sidebar-bottom">
+        <a th:href="@{/dentists/logout}" class="nav-item logout">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+        </a>
+    </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+    <div style="flex: 1;">
+
+        <div class="topbar">
+            <div>
+                <h1>Welcome, <span th:text="${dentist != null} ? ${dentist.fullName} : 'Doctor'">Dr. Name</span></h1>
+                <p>Here is your schedule and patient appointments for today.</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card blue">
+                <div class="stat-label">Total Appointments</div>
+                <div class="stat-value" th:text="${appointments != null ? appointments.size() : 0}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Pending</div>
+                <div class="stat-value" th:text="${pendingCount != null ? pendingCount : 0}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Confirmed</div>
+                <div class="stat-value" th:text="${confirmedCount != null ? confirmedCount : 0}">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Completed</div>
+                <div class="stat-value" th:text="${completedCount != null ? completedCount : 0}">0</div>
+            </div>
+        </div>
+
+        <!-- Appointments table — dentist can update status -->
+        <div class="table-card">
+            <div class="section-header">
+                <h2>My Appointments</h2>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Patient</th>
+                    <th>Current Status</th>
+                    <th>Update Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="appt : ${appointments}">
+                    <td th:text="${appt.appointmentDate}">—</td>
+                    <td th:text="${appt.appointmentTime}">—</td>
+                    <td th:text="${appt.patient.fullName}">—</td>
+                    <td>
+                        <span th:text="${appt.status}"
+                              th:classappend="${appt.status == 'CONFIRMED'} ? 'status-confirmed' :
+                                              (${appt.status == 'PENDING'}    ? 'status-pending'   :
+                                              (${appt.status == 'COMPLETED'}  ? 'status-completed' :
+                                               'status-cancelled'))"
+                              class="status-pill"></span>
+                    </td>
+                    <td>
+                        <!-- Inline form: dentist updates appointment status -->
+                        <form th:action="@{/appointments/update-status}" method="post" style="display:flex; align-items:center;">
+                            <input type="hidden" name="appointmentId" th:value="${appt.appointmentId}">
+                            <select name="status" class="status-select">
+                                <option value="PENDING"   th:selected="${appt.status == 'PENDING'}">Pending</option>
+                                <option value="CONFIRMED" th:selected="${appt.status == 'CONFIRMED'}">Confirmed</option>
+                                <option value="COMPLETED" th:selected="${appt.status == 'COMPLETED'}">Completed</option>
+                                <option value="CANCELLED" th:selected="${appt.status == 'CANCELLED'}">Cancelled</option>
+                            </select>
+                            <button type="submit" class="btn-update">Update</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${appointments == null or #lists.isEmpty(appointments)}" class="empty-row">
+                    <td colspan="5">No appointments assigned yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <footer>
+        <span>© 2026 DentalHub. All rights reserved.</span>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+        </div>
+    </footer>
+</main>
+
+</body>
+</html>

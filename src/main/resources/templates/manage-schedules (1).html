@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Schedules - DentalHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f0eb;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar (shared) ── */
+        .sidebar {
+            width: 220px; background: #ffffff;
+            display: flex; flex-direction: column; padding: 28px 16px;
+            position: fixed; top: 0; left: 0;
+            height: 100vh; box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+        }
+        .sidebar-logo { font-size: 22px; font-weight: 700; color: #0d3d8f; margin-bottom: 32px; padding-left: 8px; }
+        .sidebar-profile {
+            display: flex; align-items: center; gap: 10px;
+            background: #f5f0eb; border-radius: 0.75rem; padding: 10px; margin-bottom: 28px;
+        }
+        .sidebar-profile .avatar {
+            width: 38px; height: 38px; border-radius: 50%; background-color: #0d3d8f;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 600; font-size: 14px; flex-shrink: 0;
+        }
+        .sidebar-profile .profile-info .name { font-size: 13px; font-weight: 600; color: #1c1b1b; }
+        .sidebar-profile .profile-info .role { font-size: 11px; color: #6b7280; }
+        .nav-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; padding: 0 8px; margin-bottom: 8px; }
+        .nav-item {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 0.6rem;
+            font-size: 14px; font-weight: 500; color: #6b7280; text-decoration: none; margin-bottom: 2px;
+            transition: background 0.15s, color 0.15s;
+        }
+        .nav-item:hover { background: #f5f0eb; color: #1c1b1b; }
+        .nav-item.active { background: #0d3d8f; color: #ffffff; }
+        .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .sidebar-bottom { margin-top: auto; }
+        .nav-item.logout { color: #b91c1c; }
+        .nav-item.logout:hover { background: #fef2f2; }
+
+        /* ── Main ── */
+        .main { margin-left: 220px; flex: 1; padding: 36px 32px; display: flex; flex-direction: column; min-height: 100vh; }
+        .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+        .topbar h1 { font-size: 26px; font-weight: 700; color: #1c1b1b; }
+        .topbar p  { font-size: 14px; color: #6b7280; margin-top: 4px; }
+
+        /* ── Filter bar ── */
+        .filter-bar {
+            display: flex; align-items: center; gap: 12px;
+            background: #ffffff; border-radius: 1rem; padding: 16px 20px; margin-bottom: 24px;
+        }
+        .filter-bar label { font-size: 13px; font-weight: 600; color: #374151; white-space: nowrap; }
+        .filter-select {
+            padding: 9px 14px; border: 1.5px solid #e5e7eb; border-radius: 0.6rem;
+            font-size: 14px; font-family: 'Inter', sans-serif; background: #fafafa;
+            color: #1c1b1b; outline: none; cursor: pointer;
+        }
+        .filter-select:focus { border-color: #0d3d8f; }
+        .btn-filter {
+            padding: 9px 20px; background: #0d3d8f; color: white;
+            border: none; border-radius: 0.6rem; font-size: 14px; font-weight: 600;
+            cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.2s;
+        }
+        .btn-filter:hover { background: #0a3070; }
+
+        /* ── Table card ── */
+        .table-card { background: #ffffff; border-radius: 1.25rem; padding: 24px; margin-bottom: 28px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .section-header h2 { font-size: 18px; font-weight: 600; color: #1c1b1b; }
+
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            font-size: 11px; font-weight: 600; color: #9ca3af;
+            text-transform: uppercase; letter-spacing: 0.07em;
+            padding: 0 12px 12px; text-align: left;
+        }
+        tbody td { padding: 14px 12px; font-size: 14px; color: #374151; border-top: 1px solid #f3f4f6; }
+        tbody tr:hover { background: #fafafa; }
+        .empty-row td { text-align: center; color: #9ca3af; padding: 32px; }
+
+        /* Status pills */
+        .status-pill { display: inline-block; padding: 3px 10px; border-radius: 2rem; font-size: 12px; font-weight: 600; }
+        .status-pending   { background: #fef9c3; color: #854d0e; }
+        .status-confirmed { background: #dcfce7; color: #166534; }
+        .status-completed { background: #dbeafe; color: #1e40af; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+        /* Inline reassign form */
+        .assign-select {
+            padding: 5px 10px; border: 1.5px solid #e5e7eb; border-radius: 0.5rem;
+            font-size: 13px; font-family: 'Inter', sans-serif; background: #fafafa; cursor: pointer; outline: none;
+        }
+        .btn-assign {
+            padding: 5px 12px; background: #0d3d8f; color: white;
+            border: none; border-radius: 0.5rem; font-size: 12px; font-weight: 600;
+            cursor: pointer; font-family: 'Inter', sans-serif; margin-left: 6px;
+        }
+        .btn-assign:hover { background: #0a3070; }
+
+        /* ── Footer ── */
+        footer {
+            margin-top: auto; padding: 20px 0;
+            border-top: 1px solid #e5e7eb;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 12px; color: #9ca3af;
+        }
+        footer .footer-links { display: flex; gap: 20px; }
+        footer .footer-links a { color: #9ca3af; text-decoration: none; }
+        footer .footer-links a:hover { color: #6b7280; }
+    </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+    <div class="sidebar-logo">DentalHub</div>
+    <div class="sidebar-profile">
+        <div class="avatar" th:text="${admin != null and admin.fullName != null} ? ${#strings.substring(admin.fullName, 0, 1)} : 'A'">A</div>
+        <div class="profile-info">
+            <div class="name" th:text="${admin != null} ? ${admin.fullName} : 'Admin'">Admin</div>
+            <div class="role">Administrator</div>
+        </div>
+    </div>
+    <div class="nav-label">Menu</div>
+    <a th:href="@{/admin/dashboard}" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+    </a>
+    <a th:href="@{/admin/manage-users}" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><path d="M21 21v-2a4 4 0 0 0-3-3.85"/></svg>
+        Manage Users
+    </a>
+    <a th:href="@{/admin/manage-schedules}" class="nav-item active">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Manage Schedules
+    </a>
+    <div class="sidebar-bottom">
+        <a th:href="@{/admin/logout}" class="nav-item logout">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+        </a>
+    </div>
+</aside>
+
+<!-- ── Main ── -->
+<main class="main">
+    <div style="flex:1;">
+
+        <div class="topbar">
+            <div>
+                <h1>Manage Schedules</h1>
+                <p>View all appointments and reassign dentist slots as needed.</p>
+            </div>
+        </div>
+
+        <!-- Filter by dentist -->
+        <form th:action="@{/admin/manage-schedules}" method="get" class="filter-bar">
+            <label for="dentistFilter">Filter by Dentist:</label>
+            <select name="dentistId" id="dentistFilter" class="filter-select">
+                <option value="">All Dentists</option>
+                <option th:each="d : ${dentists}"
+                        th:value="${d.dentistId}"
+                        th:text="${d.fullName}"
+                        th:selected="${selectedDentistId != null and selectedDentistId == d.dentistId}">
+                    Dentist Name
+                </option>
+            </select>
+            <button type="submit" class="btn-filter">Filter</button>
+        </form>
+
+        <!-- All appointments table -->
+        <div class="table-card">
+            <div class="section-header">
+                <h2>Appointment Schedule</h2>
+            </div>
+            <table>
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Patient</th>
+                    <th>Assigned Dentist</th>
+                    <th>Status</th>
+                    <th>Reassign Dentist</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="appt : ${appointments}">
+                    <td th:text="${appt.appointmentDate}">—</td>
+                    <td th:text="${appt.appointmentTime}">—</td>
+                    <td th:text="${appt.patient.fullName}">—</td>
+                    <td th:text="${appt.dentist.fullName}">—</td>
+                    <td>
+                        <span th:text="${appt.status}"
+                              th:classappend="${appt.status == 'CONFIRMED'} ? 'status-confirmed' :
+                                              (${appt.status == 'PENDING'}    ? 'status-pending'   :
+                                              (${appt.status == 'COMPLETED'}  ? 'status-completed' :
+                                               'status-cancelled'))"
+                              class="status-pill"></span>
+                    </td>
+                    <td>
+                        <!-- Admin reassigns the dentist for an appointment -->
+                        <form th:action="@{/appointments/reassign}" method="post" style="display:flex; align-items:center;">
+                            <input type="hidden" name="appointmentId" th:value="${appt.appointmentId}">
+                            <select name="dentistId" class="assign-select">
+                                <option th:each="d : ${dentists}"
+                                        th:value="${d.dentistId}"
+                                        th:text="${d.fullName}"
+                                        th:selected="${d.dentistId == appt.dentist.dentistId}">
+                                </option>
+                            </select>
+                            <button type="submit" class="btn-assign">Assign</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${appointments == null or #lists.isEmpty(appointments)}" class="empty-row">
+                    <td colspan="6">No appointments found.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <footer>
+        <span>© 2026 DentalHub. All rights reserved.</span>
+        <div class="footer-links">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+        </div>
+    </footer>
+</main>
+
+</body>
+</html>
