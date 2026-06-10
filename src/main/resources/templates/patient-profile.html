@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - DentalHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f0eb;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar ── */
+        .sidebar {
+            width: 220px;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            padding: 28px 16px;
+            position: fixed;
+            top: 0; left: 0;
+            height: 100vh;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.05);
+        }
+
+        .sidebar-logo { font-size: 22px; font-weight: 700; color: #0d3d8f; margin-bottom: 32px; padding-left: 8px; }
+
+        .nav-label { font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; padding: 0 8px; margin-bottom: 8px; }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 0.6rem;
+            font-size: 14px; font-weight: 500; color: #6b7280;
+            text-decoration: none; margin-bottom: 2px;
+            transition: background 0.15s, color 0.15s;
+        }
+        .nav-item:hover { background: #f5f0eb; color: #1c1b1b; }
+        .nav-item.active { background: #eef2fb; color: #0d3d8f; font-weight: 600; }
+        .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .sidebar-bottom { margin-top: auto; }
+        .nav-item.logout { color: #b91c1c; }
+        .nav-item.logout:hover { background: #fef2f2; }
+
+        /* ── Main ── */
+        .main { margin-left: 220px; flex: 1; padding: 36px 32px; }
+
+        /* ── Profile hero ── */
+        .profile-hero { display: flex; align-items: center; gap: 28px; margin-bottom: 28px; }
+
+        .avatar-wrap { position: relative; flex-shrink: 0; cursor: pointer; }
+
+        .avatar-circle {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: #dbeafe;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 36px; font-weight: 700; color: #0d3d8f;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+
+        .edit-avatar-btn {
+            position: absolute; bottom: 4px; right: 4px;
+            width: 28px; height: 28px; background: #0d3d8f;
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border: 2px solid white;
+        }
+        .edit-avatar-btn svg { width: 13px; height: 13px; stroke: white; fill: none; }
+
+        #avatarInput { display: none; }
+
+        .profile-hero-info h1 { font-size: 32px; font-weight: 700; color: #1c1b1b; margin-bottom: 6px; }
+        .profile-hero-info .meta { font-size: 14px; color: #6b7280; display: flex; align-items: center; gap: 6px; }
+
+        .edit-profile-btn {
+            margin-left: auto; background: #0d3d8f; color: white;
+            padding: 11px 22px; border-radius: 0.6rem;
+            font-size: 14px; font-weight: 600; border: none; cursor: pointer;
+            transition: background 0.2s;
+        }
+        .edit-profile-btn:hover { background: #0a3070; }
+
+        /* ── Content grid ── */
+        .content-grid { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+        .left-col { display: flex; flex-direction: column; gap: 20px; }
+
+        /* ── Cards ── */
+        .card { background: #ffffff; border-radius: 1.25rem; padding: 28px; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+        .card-header h2 { font-size: 18px; font-weight: 600; color: #1c1b1b; }
+
+        /* ── Info grid ── */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 32px; }
+        .info-field label { display: block; font-size: 11px; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 6px; }
+        .info-field .value { font-size: 15px; color: #1c1b1b; }
+
+        /* ── Edit form ── */
+        .edit-form { display: none; }
+        .edit-form.active { display: block; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; }
+        .form-group input {
+            padding: 10px 14px; border: 1.5px solid #e5e7eb; border-radius: 0.6rem;
+            font-size: 14px; font-family: 'Inter', sans-serif; color: #1c1b1b;
+            background: #fafafa; outline: none; transition: border-color 0.2s;
+        }
+        .form-group input:focus { border-color: #0d3d8f; background: #fff; }
+
+        .form-actions { display: flex; gap: 12px; margin-top: 20px; }
+        .btn-save { background: #0d3d8f; color: white; padding: 10px 22px; border-radius: 0.6rem; font-size: 14px; font-weight: 600; border: none; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .btn-save:hover { background: #0a3070; }
+        .btn-cancel { background: transparent; color: #6b7280; padding: 10px 22px; border-radius: 0.6rem; font-size: 14px; font-weight: 500; border: 1.5px solid #e5e7eb; cursor: pointer; font-family: 'Inter', sans-serif; }
+        .btn-cancel:hover { border-color: #9ca3af; }
+
+        /* ── Security ── */
+        .security-row { display: flex; align-items: center; gap: 16px; padding: 16px; background: #f9fafb; border-radius: 0.75rem; }
+        .security-icon { width: 44px; height: 44px; background: #e5e7eb; border-radius: 0.6rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .security-icon svg { width: 20px; height: 20px; stroke: #6b7280; fill: none; }
+        .security-info { flex: 1; }
+        .security-info .sec-title { font-size: 14px; font-weight: 600; color: #1c1b1b; }
+        .security-info .sec-sub { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+        .btn-change-pw { padding: 8px 16px; border-radius: 0.6rem; border: 1.5px solid #d1d5db; background: white; font-size: 13px; font-weight: 500; color: #374151; cursor: pointer; font-family: 'Inter', sans-serif; white-space: nowrap; }
+        .btn-change-pw:hover { border-color: #9ca3af; }
+
+        /* ── Password modal ── */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 1.25rem; padding: 32px; width: 100%; max-width: 400px; }
+        .modal h3 { font-size: 18px; font-weight: 600; margin-bottom: 20px; }
+        .modal .form-group { margin-bottom: 14px; }
+        .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
+
+        /* ── Right column ── */
+        .stats-card { background: #0d3d8f; border-radius: 1.25rem; padding: 28px; color: white; margin-bottom: 16px; }
+        .stats-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7; margin-bottom: 8px; }
+        .stats-total { font-size: 52px; font-weight: 700; line-height: 1; margin-bottom: 20px; }
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+        .stat-box { text-align: center; }
+        .stat-box .stat-sub { font-size: 12px; opacity: 0.7; margin-bottom: 4px; }
+        .stat-box .stat-num { font-size: 24px; font-weight: 700; }
+        .btn-history { display: block; width: 100%; background: #c6f135; color: #1c1b1b; text-align: center; padding: 12px; border-radius: 0.75rem; font-size: 14px; font-weight: 700; text-decoration: none; }
+        .btn-history:hover { opacity: 0.9; }
+
+        .quick-card { background: white; border-radius: 1.25rem; overflow: hidden; }
+        .quick-row { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-bottom: 1px solid #f3f4f6; text-decoration: none; color: #1c1b1b; transition: background 0.15s; cursor: pointer; }
+        .quick-row:last-child { border-bottom: none; }
+        .quick-row:hover { background: #f9fafb; }
+        .quick-row svg { width: 18px; height: 18px; flex-shrink: 0; stroke: currentColor; fill: none; stroke-width: 2; }
+        .quick-row .quick-label { flex: 1; font-size: 14px; font-weight: 500; }
+        .quick-row .chevron { color: #9ca3af; font-size: 18px; }
+        .quick-row.logout-row { color: #b91c1c; }
+
+        /* ── Feedback ── */
+        .success-msg { background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; border-radius: 0.5rem; padding: 10px 14px; font-size: 13px; margin-bottom: 20px; }
+        .error-msg { background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; border-radius: 0.5rem; padding: 10px 14px; font-size: 13px; margin-bottom: 20px; }
+
+        /* ── Toast ── */
+        .toast { position: fixed; bottom: 28px; right: 28px; background: #1c1b1b; color: white; padding: 12px 20px; border-radius: 0.75rem; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 200; }
+        .toast.show { opacity: 1; }
+    </style>
+</head>
+<body>
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+    <div class="sidebar-logo">DentalHub</div>
+    <div class="nav-label">Menu</div>
+    <a th:href="@{/patients/dashboard}" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+    </a>
+    <a th:href="@{/patients/appointments}" class="nav-item">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Appointments
+    </a>
+    <a th:href="@{/patients/profile}" class="nav-item active">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Profile
+    </a>
+    <div class="sidebar-bottom">
+        <a th:href="@{/patients/logout}" class="nav-item logout">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Logout
+        </a>
+    </div>
+</aside>
+
+<!-- ── Password Modal ── -->
+<div class="modal-overlay" id="pwModal">
+    <div class="modal">
+        <h3>Change Password</h3>
+        <form th:action="@{/patients/change-password}" method="post">
+            <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" name="currentPassword" placeholder="Enter current password" required>
+            </div>
+            <div class="form-group">
+                <label>New Password</label>
+                <input type="password" name="newPassword" id="newPw" placeholder="Enter new password" required>
+            </div>
+            <div class="form-group">
+                <label>Confirm New Password</label>
+                <input type="password" name="confirmPassword" id="confirmPw" placeholder="Confirm new password" required>
+            </div>
+            <div class="modal-actions">
+                <button type="submit" class="btn-save">Update Password</button>
+                <button type="button" class="btn-cancel" onclick="closePwModal()">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ── Main ── -->
+<main class="main">
+
+    <!-- Hidden file input for avatar -->
+    <input type="file" id="avatarInput" accept="image/*" onchange="previewAvatar(event)">
+
+    <!-- Profile hero -->
+    <div class="profile-hero">
+        <div class="avatar-wrap" onclick="document.getElementById('avatarInput').click()">
+            <div class="avatar-circle" id="avatarCircle">
+                <img id="avatarImg" src="" alt="" style="display:none;">
+                <span id="avatarInitial" th:text="${#strings.substring(patient.fullName,0,1)}">J</span>
+            </div>
+            <div class="edit-avatar-btn">
+                <svg viewBox="0 0 24 24" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </div>
+        </div>
+        <div class="profile-hero-info">
+            <h1 th:text="${patient.fullName}">Jane Doe</h1>
+            <div class="meta">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span th:text="${patient.email}">email@example.com</span>
+            </div>
+        </div>
+        <button class="edit-profile-btn" onclick="toggleEdit()">Edit Profile</button>
+    </div>
+
+    <div class="content-grid">
+        <div class="left-col">
+
+            <div th:if="${success}" th:text="${success}" class="success-msg"></div>
+            <div th:if="${error}" th:text="${error}" class="error-msg"></div>
+
+            <!-- Personal Information -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Personal Information</h2>
+                    <svg width="18" height="18" fill="none" stroke="#9ca3af" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+
+                <!-- View mode -->
+                <div id="viewMode">
+                    <div class="info-grid">
+                        <div class="info-field">
+                            <label>Full Name</label>
+                            <div class="value" th:text="${patient.fullName}">—</div>
+                        </div>
+                        <div class="info-field">
+                            <label>Email Address</label>
+                            <div class="value" th:text="${patient.email}">—</div>
+                        </div>
+                        <div class="info-field">
+                            <label>Phone Number</label>
+                            <div class="value" th:text="${patient.phoneNumber}">—</div>
+                        </div>
+                        <div class="info-field">
+                            <label>Patient ID</label>
+                            <div class="value" th:text="${patient.patientId}">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit mode -->
+                <div id="editMode" class="edit-form">
+                    <form th:action="@{/patients/profile}" method="post" th:object="${patient}">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" th:field="*{fullName}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" th:field="*{email}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="text" th:field="*{phoneNumber}" required>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-save">Save Changes</button>
+                            <button type="button" class="btn-cancel" onclick="toggleEdit()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Account Security -->
+            <div class="card">
+                <div class="card-header"><h2>Account Security</h2></div>
+                <div class="security-row">
+                    <div class="security-icon">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                    <div class="security-info">
+                        <div class="sec-title">Password</div>
+                        <div class="sec-sub">Keep your account secure with a strong password</div>
+                    </div>
+                    <button class="btn-change-pw" onclick="openPwModal()">Change Password</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right column -->
+        <div>
+            <div class="stats-card">
+                <div class="stats-label">Total Appointments</div>
+                <div class="stats-total" th:text="${appointments != null ? appointments.size() : 0}">0</div>
+                <div class="stats-row">
+                    <div class="stat-box">
+                        <div class="stat-sub">Upcoming</div>
+                        <div class="stat-num" th:text="${upcomingCount != null ? upcomingCount : 0}">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-sub">Completed</div>
+                        <div class="stat-num" th:text="${completedCount != null ? completedCount : 0}">0</div>
+                    </div>
+                </div>
+                <a th:href="@{/patients/dashboard}" class="btn-history">View History →</a>
+            </div>
+
+            <div class="quick-card">
+                <div class="quick-row" onclick="showToast('Notification settings coming soon')">
+                    <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                    <span class="quick-label">Notification Settings</span>
+                    <span class="chevron">›</span>
+                </div>
+                <div class="quick-row" onclick="showToast('Privacy settings coming soon')">
+                    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <span class="quick-label">Privacy &amp; Data</span>
+                    <span class="chevron">›</span>
+                </div>
+                <a th:href="@{/patients/logout}" class="quick-row logout-row">
+                    <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    <span class="quick-label">Logout</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+    // ── Edit profile toggle ──
+    function toggleEdit() {
+        const view = document.getElementById('viewMode');
+        const edit = document.getElementById('editMode');
+        const isEditing = edit.classList.contains('active');
+        if (isEditing) {
+            edit.classList.remove('active');
+            view.style.display = 'block';
+        } else {
+            edit.classList.add('active');
+            view.style.display = 'none';
+        }
+    }
+
+    // ── Password modal ──
+    function openPwModal() { document.getElementById('pwModal').classList.add('active'); }
+    function closePwModal() { document.getElementById('pwModal').classList.remove('active'); }
+
+    // Close modal on overlay click
+    document.getElementById('pwModal').addEventListener('click', function(e) {
+        if (e.target === this) closePwModal();
+    });
+
+    // ── Avatar preview (local only — not saved to DB yet) ──
+    function previewAvatar(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById('avatarImg');
+            const initial = document.getElementById('avatarInitial');
+            img.src = e.target.result;
+            img.style.display = 'block';
+            initial.style.display = 'none';
+            showToast('Photo updated! (preview only — save to persist)');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ── Toast notification ──
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Auto-open edit mode if there's an error (form was submitted with errors)
+    window.onload = function() {
+        const hasError = document.querySelector('.error-msg');
+        if (hasError) toggleEdit();
+
+        // Auto-open password modal if redirected with pw error/success
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('pwError') || params.get('pwSuccess')) openPwModal();
+    };
+</script>
+
+</body>
+</html>

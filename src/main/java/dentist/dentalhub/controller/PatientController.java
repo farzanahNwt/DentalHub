@@ -1,11 +1,14 @@
 package dentist.dentalhub.controller;
 
+import dentist.dentalhub.model.Appointment;
 import dentist.dentalhub.model.Patient;
+import dentist.dentalhub.service.AppointmentService;
 import dentist.dentalhub.service.PatientService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
+import java.util.List;
 
 /**
  * Controller to handle Patient module: registration, login, dashboard, and profile.
@@ -14,10 +17,14 @@ import jakarta.servlet.http.HttpSession;
 @RequestMapping("/patients")
 public class PatientController {
 
+    //  Fields are INSIDE the class
     private final PatientService patientService;
+    private final AppointmentService appointmentService;
 
-    public PatientController(PatientService patientService) {
+    // Both services injected in constructor
+    public PatientController(PatientService patientService, AppointmentService appointmentService) {
         this.patientService = patientService;
+        this.appointmentService = appointmentService;
     }
 
     // --------------------- REGISTER ---------------------
@@ -25,7 +32,7 @@ public class PatientController {
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("patient", new Patient());
-        return "register"; // maps to register.html
+        return "register";
     }
 
     @PostMapping("/register")
@@ -36,7 +43,7 @@ public class PatientController {
         }
         patientService.savePatient(patient);
         model.addAttribute("success", "Registration successful. Please login.");
-        return "login"; // redirect to login page after registration
+        return "login";
     }
 
     // --------------------- LOGIN ---------------------
@@ -44,7 +51,7 @@ public class PatientController {
     @GetMapping("/login")
     public String showLoginForm(Model model) {
         model.addAttribute("patient", new Patient());
-        return "login"; // maps to login.html
+        return "login";
     }
 
     @PostMapping("/login")
@@ -69,7 +76,31 @@ public class PatientController {
         if (patient == null) return "redirect:/patients/login";
 
         model.addAttribute("patient", patient);
-        return "patient-dashboard"; // maps to patient-dashboard.html
+
+        // Fetch appointments for this patient
+        List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patient);
+        model.addAttribute("appointments", appointments);
+
+        return "patient-dashboard";
+    }
+
+    // --------------------- APPOINTMENTS (ADDED) ---------------------
+
+    /**
+     * Handles the "Appointments" sidebar option & "Book New Appointment" CTA button.
+     */
+    @GetMapping("/appointments")
+    public String patientAppointments(HttpSession session, Model model) {
+        Patient patient = (Patient) session.getAttribute("loggedInPatient");
+        if (patient == null) return "redirect:/patients/login";
+
+        model.addAttribute("patient", patient);
+
+        // Pass appointments array to the booking view as well if needed
+        List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patient);
+        model.addAttribute("appointments", appointments);
+
+        return "patient-appointments"; // Make sure you have a 'patient-appointments.html' file!
     }
 
     // --------------------- PROFILE ---------------------
@@ -80,7 +111,24 @@ public class PatientController {
         if (patient == null) return "redirect:/patients/login";
 
         model.addAttribute("patient", patient);
-        return "patient-profile"; // maps to patient-profile.html
+
+        // Pass appointments and counts for the stats card
+        List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patient);
+        model.addAttribute("appointments", appointments);
+
+        long upcoming = appointments.stream()
+                .filter(a -> "CONFIRMED".equalsIgnoreCase(a.getStatus()) ||
+                        "PENDING".equalsIgnoreCase(a.getStatus()))
+                .count();
+
+        long completed = appointments.stream()
+                .filter(a -> "COMPLETED".equalsIgnoreCase(a.getStatus()))
+                .count();
+
+        model.addAttribute("upcomingCount", upcoming);
+        model.addAttribute("completedCount", completed);
+
+        return "patient-profile";
     }
 
     @PostMapping("/profile")
@@ -98,9 +146,65 @@ public class PatientController {
         patientService.savePatient(patient);
         session.setAttribute("loggedInPatient", patient);
 
+        model.addAttribute("patient", patient);
         model.addAttribute("success", "Profile updated successfully");
+
+        // Re-add appointments for the stats card
+        List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patient);
+        model.addAttribute("appointments", appointments);
+
+        long upcoming = appointments.stream()
+                .filter(a -> "CONFIRMED".equalsIgnoreCase(a.getStatus()) ||
+                        "PENDING".equalsIgnoreCase(a.getStatus()))
+                .count();
+        long completed = appointments.stream()
+                .filter(a -> "COMPLETED".equalsIgnoreCase(a.getStatus()))
+                .count();
+
+        model.addAttribute("upcomingCount", upcoming);
+        model.addAttribute("completedCount", completed);
+
         return "patient-profile";
     }
+
+    // --------------------- CHANGE PASSWORD ---------------------
+
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam String currentPassword,
+                                 @RequestParam String newPassword,
+                                 @RequestParam String confirmPassword,
+                                 HttpSession session,
+                                 Model model) {
+        Patient patient = (Patient) session.getAttribute("loggedInPatient");
+        if (patient == null) return "redirect:/patients/login";
+
+        // Re-add required model attributes regardless of outcome
+        List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patient);
+        model.addAttribute("appointments", appointments);
+        model.addAttribute("upcomingCount", appointments.stream()
+                .filter(a -> "CONFIRMED".equalsIgnoreCase(a.getStatus()) ||
+                        "PENDING".equalsIgnoreCase(a.getStatus())).count());
+        model.addAttribute("completedCount", appointments.stream()
+                .filter(a -> "COMPLETED".equalsIgnoreCase(a.getStatus())).count());
+        model.addAttribute("patient", patient);
+
+        if (!patient.getPassword().equals(currentPassword)) {
+            model.addAttribute("error", "Current password is incorrect");
+            return "patient-profile";
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("error", "New passwords do not match");
+            return "patient-profile";
+        }
+
+        patient.setPassword(newPassword);
+        patientService.savePatient(patient);
+        session.setAttribute("loggedInPatient", patient);
+
+        model.addAttribute("success", "Password updated successfully");
+        return "patient-profile";
+    }
+
 
     // --------------------- LOGOUT ---------------------
 

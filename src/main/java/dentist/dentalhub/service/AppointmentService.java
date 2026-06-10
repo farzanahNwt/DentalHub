@@ -1,6 +1,7 @@
 package dentist.dentalhub.service;
 
 import dentist.dentalhub.model.Appointment;
+import dentist.dentalhub.model.Patient;
 import dentist.dentalhub.repository.AppointmentRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -22,6 +23,12 @@ public class AppointmentService {
     public List<Appointment> getHistory(Long patientId) {
         return appointmentRepository.findByPatientIdOrderByAppointmentDateDesc(patientId);
     }
+
+    // Farzanah added this — used by PatientController dashboard
+    public List<Appointment> getAppointmentsByPatient(Patient patient) {
+        return appointmentRepository.findByPatientIdOrderByAppointmentDateDesc(patient.getPatientId());
+    }
+
 
     public Optional<Appointment> getAppointmentDetails(Long appointmentId) {
         return appointmentRepository.findById(appointmentId);

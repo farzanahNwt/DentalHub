@@ -1,0 +1,165 @@
+/* -------------------------- Global -------------------------- */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #fcf9f8; /* surface */
+    color: #1c1b1b; /* on-surface */
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    text-decoration: none;
+    color: #0056b3; /* primary */
+}
+
+.container {
+    max-width: 480px;
+    margin: 50px auto;
+    padding: 20px;
+}
+
+/* -------------------------- Cards -------------------------- */
+.card {
+    background-color: #ffffff; /* base surface */
+    border-radius: 1rem;
+    box-shadow: 0px 4px 20px rgba(0,0,0,0.05); /* ambient shadow */
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+/* -------------------------- Forms -------------------------- */
+form label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600; /* label-bold */
+}
+
+form input[type="text"],
+form input[type="email"],
+form input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6; /* light gray border */
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+form input[type="checkbox"] {
+    margin-right: 8px;
+}
+
+/* -------------------------- Buttons -------------------------- */
+.btn-primary {
+    background-color: #0056b3; /* primary */
+    color: #ffffff; /* on-primary */
+    padding: 12px;
+    border-radius: 1rem;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.btn-primary:hover {
+    background-color: #003f87; /* darker primary on hover */
+}
+
+.btn-logout, .btn-back {
+    background-color: transparent;
+    color: #0056b3;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+/* -------------------------- Feedback Messages -------------------------- */
+.error {
+    color: #ba1a1a; /* error color */
+    margin-top: 8px;
+}
+
+.success {
+    color: #115cb9; /* surface tint / success color */
+    margin-top: 8px;
+}
+
+/* -------------------------- Headers & Titles -------------------------- */
+h1 {
+    font-size: 32px; /* headline-md */
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+h2 {
+    font-size: 24px; /* headline-sm */
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 16px; /* body-md */
+    font-weight: 400;
+    color: #526069; /* secondary */
+    margin-bottom: 20px;
+}
+
+/* -------------------------- Links -------------------------- */
+.login-link, .register-link {
+    font-size: 14px;
+    color: #003f87;
+    text-align: center;
+    display: block;
+    margin-top: 15px;
+}
+
+/* -------------------------- Dashboard Cards -------------------------- */
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.dashboard-card {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0px 4px 20px rgba(0,0,0,0.05);
+    padding: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+}
+
+table th, table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #eae7e7; /* surface-container-high */
+}
+
+table th {
+    font-weight: 600;
+}
+
+/* -------------------------- Profile -------------------------- */
+.profile-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* -------------------------- Responsive -------------------------- */
+@media (max-width: 600px) {
+    .container {
+        margin: 20px;
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 24px;
+    }
+}

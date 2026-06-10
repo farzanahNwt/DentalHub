@@ -12,6 +12,7 @@ public class Patient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "patient_seq", sequenceName = "PATIENT_SEQ", allocationSize = 1)
     @Column(name = "PATIENT_ID")
     private Long patientId;
 
