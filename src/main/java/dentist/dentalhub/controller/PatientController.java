@@ -4,6 +4,7 @@ import dentist.dentalhub.model.Appointment;
 import dentist.dentalhub.model.Patient;
 import dentist.dentalhub.service.AppointmentService;
 import dentist.dentalhub.service.PatientService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import java.util.List;
 @Controller
 @RequestMapping("/patients")
 public class PatientController {
+
 
     //  Fields are INSIDE the class
     private final PatientService patientService;
