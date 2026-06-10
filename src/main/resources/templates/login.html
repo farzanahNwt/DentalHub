@@ -1,10 +1,229 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DentalHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f0eb;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border-radius: 1.25rem;
+            padding: 40px 36px;
+            box-shadow: 0 4px 32px rgba(0, 0, 0, 0.07);
+            text-align: center;
+        }
+
+        .logo-circle {
+            width: 64px;
+            height: 64px;
+            background-color: #0d3d8f;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .logo-circle svg {
+            width: 32px;
+            height: 32px;
+            fill: white;
+        }
+
+        .login-card h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1c1b1b;
+            margin: 0 0 6px;
+        }
+
+        .login-card .subtitle {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 0 0 28px;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 0.6rem;
+            font-size: 15px;
+            color: #1c1b1b;
+            background: #fafafa;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: #0056b3;
+            background: #fff;
+        }
+
+        .form-group input::placeholder {
+            color: #9ca3af;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 12px;
+            background-color: #0d3d8f;
+            color: white;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 0.6rem;
+            cursor: pointer;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-login:hover {
+            background-color: #0a3070;
+        }
+
+        .btn-login svg {
+            width: 18px;
+            height: 18px;
+            stroke: white;
+            fill: none;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 20px 0;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e5e7eb;
+        }
+
+        .register-link {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 0;
+        }
+
+        .register-link a {
+            color: #0056b3;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            border-radius: 0.5rem;
+            padding: 10px 14px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .footer-text {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+    </style>
 </head>
 <body>
+<div class="login-wrapper">
+    <div class="login-card">
 
+        <!-- Logo -->
+        <div class="logo-circle">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C9.5 2 7.5 3.5 6.5 5.5C5.2 5.2 3 6 3 8.5C3 10.5 4.2 11.8 5 12.3C5 15 5.5 19 8 21C9 22 10 22 10.5 21C11 20 11 18.5 12 18.5C13 18.5 13 20 13.5 21C14 22 15 22 16 21C18.5 19 19 15 19 12.3C19.8 11.8 21 10.5 21 8.5C21 6 18.8 5.2 17.5 5.5C16.5 3.5 14.5 2 12 2Z"/>
+            </svg>
+        </div>
+
+        <h1>DentalHub</h1>
+        <p class="subtitle">Welcome back to your premium dental care experience.</p>
+
+        <form th:action="@{/patients/login}" method="post">
+
+            <p th:if="${error}" th:text="${error}" class="error"></p>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" name="email" id="email" placeholder="name@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" placeholder="Enter your password" required>
+            </div>
+
+            <button type="submit" class="btn-login">
+                Login
+                <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                    <polyline points="10 17 15 12 10 7"/>
+                    <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+            </button>
+        </form>
+
+        <div class="divider">or</div>
+
+        <p class="register-link">New patient? <a th:href="@{/patients/register}">Register an account</a></p>
+    </div>
+
+    <p class="footer-text">© 2026 DentalHub. All rights reserved.</p>
+</div>
 </body>
 </html>

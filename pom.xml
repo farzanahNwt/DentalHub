@@ -100,6 +100,7 @@
                     </excludes>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -135,8 +136,17 @@
                         </configuration>
                     </execution>
                 </executions>
+
+                <configuration>
+                    <source>24</source>
+                    <target>24</target>
+                    <compilerArgs>
+                        <arg>--enable-preview</arg>
+                    </compilerArgs>
+                </configuration>
             </plugin>
         </plugins>
     </build>
+
 
 </project>
