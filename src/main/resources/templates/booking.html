@@ -2,66 +2,94 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DentalHub - Book Appointment</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 40px; }
-        .container { max-width: 500px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin: 0 auto; }
-        h2 { color: #2c3e50; margin-bottom: 20px; text-align: center; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; color: #34495e; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
-        button:hover { background-color: #2980b9; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; }
+
+        /* Shared Navigation Header */
+        .navbar { background-color: #0f172a; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+        .nav-logo { font-size: 1.25rem; font-weight: 700; color: #0ea5e9; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+        .nav-links a { color: #94a3b8; text-decoration: none; margin-left: 1.5rem; font-size: 0.95rem; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: white; }
+
+        /* Main View Wrapper */
+        .page-container { max-width: 600px; margin: 3rem auto; padding: 0 1.5rem; }
+        .card { background: white; border-radius: 12px; padding: 2.5rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05); border: 1px solid #e2e8f0; }
+        h2 { font-size: 1.5rem; color: #0f172a; margin-bottom: 0.5rem; font-weight: 700; }
+        .subtitle { color: #64748b; font-size: 0.9rem; margin-bottom: 2rem; }
+
+        /* Form Components */
+        .form-group { margin-bottom: 1.25rem; }
+        label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 600; color: #334155; }
+        input, select, textarea { width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.95rem; color: #0f172a; transition: border-color 0.2s; outline: none; }
+        input:focus, select:focus, textarea:focus { border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); }
+        textarea { resize: vertical; }
+
+        .btn-submit { width: 100%; padding: 0.875rem; background-color: #0ea5e9; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 1rem; transition: background-color 0.2s; }
+        .btn-submit:hover { background-color: #0284c7; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Book an Appointment</h2>
-    <form th:action="@{/appointments/book}" th:object="${appointment}" method="post">
+<nav class="navbar">
+    <a href="#" class="nav-logo">🦷 DentalHub</a>
+    <div class="nav-links">
+        <a href="/appointments/history?patientId=1">My History</a>
+        <a href="/appointments/book" class="active">Book Appointment</a>
+    </div>
+</nav>
 
-        <div class="form-group">
-            <label>Patient ID:</label>
-            <input type="number" th:field="*{patientId}" placeholder="Enter Patient ID (e.g., 1)" required />
-        </div>
+<div class="page-container">
+    <div class="card">
+        <h2>Schedule Appointment</h2>
+        <p class="subtitle">Select your dental professional, care option, and preferred date.</p>
 
-        <div class="form-group">
-            <label>Select Dentist ID:</label>
-            <input type="number" th:field="*{dentistId}" placeholder="Enter Dentist ID (e.g., 1)" required />
-        </div>
+        <form th:action="@{/appointments/book}" th:object="${appointment}" method="post">
+            <div class="form-group">
+                <label>Patient Registration ID</label>
+                <input type="number" th:field="*{patientId}" placeholder="e.g., 1001" required />
+            </div>
 
-        <div class="form-group">
-            <label>Appointment Date:</label>
-            <input type="date" th:field="*{appointmentDate}" required />
-        </div>
+            <div class="form-group">
+                <label>Assigned Dentist ID</label>
+                <input type="number" th:field="*{dentistId}" placeholder="e.g., 502" required />
+            </div>
 
-        <div class="form-group">
-            <label>Preferred Time Slot:</label>
-            <select th:field="*{appointmentTime}">
-                <option value="09:00 AM">09:00 AM</option>
-                <option value="10:30 AM">10:30 AM</option>
-                <option value="02:00 PM">02:00 PM</option>
-                <option value="03:30 PM">03:30 PM</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label>Preferred Date</label>
+                <input type="date" th:field="*{appointmentDate}" required />
+            </div>
 
-        <div class="form-group">
-            <label>Treatment Type:</label>
-            <select th:field="*{treatmentType}">
-                <option value="CHECKUP">Checkup</option>
-                <option value="SCALING">Scaling</option>
-                <option value="FILLING">Filling</option>
-                <option value="EXTRACTION">Extraction</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label>Available Time Slot</label>
+                <select th:field="*{appointmentTime}">
+                    <option value="09:00 AM">09:00 AM - Morning Session</option>
+                    <option value="10:30 AM">10:30 AM - Morning Session</option>
+                    <option value="02:00 PM">02:00 PM - Afternoon Session</option>
+                    <option value="03:30 PM">03:30 PM - Evening Session</option>
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label>Additional Notes:</label>
-            <textarea th:field="*{notes}" rows="3" placeholder="Any symptoms or medical alerts..."></textarea>
-        </div>
+            <div class="form-group">
+                <label>Treatment Type Category</label>
+                <select th:field="*{treatmentType}">
+                    <option value="CHECKUP">General Consultation & Checkup</option>
+                    <option value="SCALING">Dental Scaling & Polishing</option>
+                    <option value="FILLING">Composite Cavity Filling</option>
+                    <option value="EXTRACTION">Tooth Extraction Procedure</option>
+                </select>
+            </div>
 
-        <button type="submit">Confirm Booking</button>
-    </form>
+            <div class="form-group">
+                <label>Medical Alerts / Specific Symptoms</label>
+                <textarea th:field="*{notes}" rows="3" placeholder="Describe any swelling, active pain, or list medication details..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">Confirm and Secure Slot</button>
+        </form>
+    </div>
 </div>
 
 </body>

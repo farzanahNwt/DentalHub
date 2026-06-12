@@ -2,57 +2,89 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DentalHub - Appointment History</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 40px; }
-        .container { max-width: 900px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { color: #2c3e50; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #34495e; color: white; }
-        .status { font-weight: bold; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-        .status-pending { background-color: #ffeaa7; color: #d63031; }
-        .status-completed { background-color: #55efc4; color: #00b894; }
-        .btn-view { background: #3498db; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-size: 13px; }
-        .btn-book { display: inline-block; background: #2ecc71; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-bottom: 15px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; }
+
+        .navbar { background-color: #0f172a; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .nav-logo { font-size: 1.25rem; font-weight: 700; color: #0ea5e9; text-decoration: none; }
+        .nav-links a { color: #94a3b8; text-decoration: none; margin-left: 1.5rem; font-size: 0.95rem; }
+        .nav-links a.active { color: white; }
+
+        .dashboard-container { max-width: 1000px; margin: 3rem auto; padding: 0 1.5rem; }
+        .table-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        h2 { font-size: 1.5rem; color: #0f172a; font-weight: 700; }
+
+        .btn-add { background-color: #22c55e; color: white; padding: 0.625rem 1.25rem; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 0.9rem; transition: background-color 0.2s; }
+        .btn-add:hover { background-color: #16a34a; }
+
+        /* Modern UI Table Design */
+        .table-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05); border: 1px solid #e2e8f0; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { background-color: #f8fafc; color: #64748b; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e2e8f0; font-size: 0.95rem; color: #334155; }
+        tr:last-child td { border-bottom: none; }
+
+        /* Status Badge Labels */
+        .badge { font-size: 0.75rem; font-weight: 700; padding: 0.35rem 0.75rem; border-radius: 50px; text-transform: uppercase; }
+        .badge-pending { background-color: #fef3c7; color: #d97706; }
+        .badge-completed { background-color: #dcfce7; color: #16a34a; }
+
+        .btn-view-action { border: 1px solid #cbd5e1; color: #475569; padding: 0.5rem 1rem; text-decoration: none; border-radius: 6px; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
+        .btn-view-action:hover { background-color: #f1f5f9; border-color: #94a3b8; }
+        .empty-row-text { text-align: center; color: #94a3b8; padding: 3rem 0; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Your Appointment History</h2>
-    <a th:href="@{/appointments/book}" class="btn-book">+ Book New Appointment</a>
+<nav class="navbar">
+    <a href="#" class="nav-logo">🦷 DentalHub</a>
+    <div class="nav-links">
+        <a href="#" class="active">My History</a>
+        <a href="/appointments/book">Book Appointment</a>
+    </div>
+</nav>
 
-    <table>
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Date</th>
-            <th>Time</th>
-            <th>Treatment</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="appt : ${history}">
-            <td th:text="${appt.appointmentId}">1</td>
-            <td th:text="${appt.appointmentDate}">2026-06-15</td>
-            <td th:text="${appt.appointmentTime}">10:00 AM</td>
-            <td th:text="${appt.treatmentType}">SCALING</td>
-            <td>
-                    <span th:text="${appt.status}"
-                          th:class="${appt.status == 'PENDING' ? 'status status-pending' : 'status status-completed'}">PENDING</span>
-            </td>
-            <td>
-                <a th:href="@{/appointments/details(id=${appt.appointmentId})}" class="btn-view">View Details</a>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(history)}">
-            <td colspan="6" style="text-align: center; color: #7f8c8d;">No appointments found.</td>
-        </tr>
-        </tbody>
-    </table>
+<div class="dashboard-container">
+    <div class="table-header-row">
+        <h2>Your Appointment Registry</h2>
+        <a th:href="@{/appointments/book}" class="btn-add">+ Book New Appointment</a>
+    </div>
+
+    <div class="table-card">
+        <table>
+            <thead>
+            <tr>
+                <th>Appointment ID</th>
+                <th>Date</th>
+                <th>Time Window</th>
+                <th>Treatment Area</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="appt : ${history}">
+                <td style="font-weight: 600; color: #0f172a;" th:text="'#' + ${appt.appointmentId}">#1</td>
+                <td th:text="${appt.appointmentDate}">2026-06-15</td>
+                <td th:text="${appt.appointmentTime}">10:00 AM</td>
+                <td th:text="${appt.treatmentType}">SCALING</td>
+                <td>
+                        <span th:text="${appt.status}"
+                              th:class="${appt.status == 'PENDING' ? 'badge badge-pending' : 'badge badge-completed'}">PENDING</span>
+                </td>
+                <td>
+                    <a th:href="@{/appointments/details(id=${appt.appointmentId})}" class="btn-view-action">Manage Details</a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(history)}">
+                <td colspan="6" class="empty-row-text">No systematic booking logs registered to this Patient account profile.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 </body>

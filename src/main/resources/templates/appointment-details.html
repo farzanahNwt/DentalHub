@@ -2,58 +2,81 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointment Details</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 40px; }
-        .card { max-width: 500px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin: 0 auto; }
-        h2 { color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
-        .label { font-weight: bold; color: #7f8c8d; }
-        .value { color: #2c3e50; font-weight: 500; }
-        .actions { margin-top: 25px; display: flex; justify-content: space-between; }
-        .btn-back { background: #7f8c8d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; }
-        .btn-cancel { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-cancel:hover { background: #c0392b; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; }
+
+        .navbar { background-color: #0f172a; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; color: white; }
+        .nav-logo { font-size: 1.25rem; font-weight: 700; color: #0ea5e9; text-decoration: none; }
+        .nav-links a { color: #94a3b8; text-decoration: none; margin-left: 1.5rem; font-size: 0.95rem; }
+
+        .page-container { max-width: 550px; margin: 4rem auto; padding: 0 1.5rem; }
+        .detail-card { background: white; border-radius: 12px; padding: 2.5rem; box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.05); border: 1px solid #e2e8f0; }
+
+        h2 { font-size: 1.35rem; color: #0f172a; margin-bottom: 1.5rem; font-weight: 700; border-bottom: 2px solid #f1f5f9; padding-bottom: 1rem; }
+
+        .meta-data-row { display: flex; justify-content: space-between; align-items: center; padding: 0.875rem 0; border-bottom: 1px solid #f1f5f9; }
+        .meta-label { font-size: 0.875rem; color: #64748b; font-weight: 500; }
+        .meta-value { font-size: 0.95rem; color: #0f172a; font-weight: 600; text-align: right; }
+
+        .action-row { margin-top: 2.5rem; display: flex; gap: 1rem; }
+        .btn-return { flex: 1; text-align: center; padding: 0.75rem; background-color: #f1f5f9; color: #475569; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; transition: background-color 0.2s; }
+        .btn-return:hover { background-color: #e2e8f0; }
+
+        .cancel-form-wrapper { flex: 1; }
+        .btn-trigger-cancel { width: 100%; padding: 0.75rem; background-color: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: background-color 0.2s; }
+        .btn-trigger-cancel:hover { background-color: #dc2626; }
     </style>
 </head>
 <body>
 
-<div class="card" th:if="${appointment != null}">
-    <h2>Appointment Summary</h2>
+<nav class="navbar">
+    <a href="#" class="nav-logo">🦷 DentalHub</a>
+</nav>
 
-    <div class="info-row">
-        <span class="label">Appointment ID:</span>
-        <span class="value" th:text="${appointment.appointmentId}"></span>
-    </div>
-    <div class="info-row">
-        <span class="label">Date:</span>
-        <span class="value" th:text="${appointment.appointmentDate}"></span>
-    </div>
-    <div class="info-row">
-        <span class="label">Time Slot:</span>
-        <span class="value" th:text="${appointment.appointmentTime}"></span>
-    </div>
-    <div class="info-row">
-        <span class="label">Treatment Plan:</span>
-        <span class="value" th:text="${appointment.treatmentType}"></span>
-    </div>
-    <div class="info-row">
-        <span class="label">Current Status:</span>
-        <span class="value" th:text="${appointment.status}"></span>
-    </div>
-    <div class="info-row">
-        <span class="label">Notes:</span>
-        <span class="value" th:text="${appointment.notes != null && !appointment.notes.isEmpty() ? appointment.notes : 'None'}"></span>
-    </div>
+<div class="page-container">
+    <div class="detail-card" th:if="${appointment != null}">
+        <h2>Appointment Overview</h2>
 
-    <div class="actions">
-        <a th:href="@{/appointments/history(patientId=${appointment.patientId})}" class="btn-back">Back to History</a>
+        <div class="meta-data-row">
+            <span class="meta-label">Reference ID Mapping</span>
+            <span class="meta-value" th:text="'# ' + ${appointment.appointmentId}"></span>
+        </div>
+        <div class="meta-data-row">
+            <span class="meta-label">Scheduled Date</span>
+            <span class="meta-value" th:text="${appointment.appointmentDate}"></span>
+        </div>
+        <div class="meta-data-row">
+            <span class="meta-label">Reserved Time Window</span>
+            <span class="meta-value" th:text="${appointment.appointmentTime}"></span>
+        </div>
+        <div class="meta-data-row">
+            <span class="meta-label">Clinical Treatment Plan</span>
+            <span class="meta-value" th:text="${appointment.treatmentType}"></span>
+        </div>
+        <div class="meta-data-row">
+            <span class="meta-label">Current Booking Status</span>
+            <span class="meta-value" style="color: #d97706;" th:text="${appointment.status}"></span>
+        </div>
+        <div class="meta-data-row" style="flex-direction: column; align-items: flex-start; gap: 0.5rem; border-bottom: none;">
+            <span class="meta-label">Patient History Notes</span>
+            <p class="meta-value" style="text-align: left; font-weight: 400; color: #475569; font-size: 0.9rem;"
+               th:text="${appointment.notes != null && !appointment.notes.isEmpty() ? appointment.notes : 'No specific treatment notes added by user.'}"></p>
+        </div>
 
-        <form th:action="@{/appointments/cancel}" method="post" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
-            <input type="hidden" name="id" th:value="${appointment.appointmentId}" />
-            <input type="hidden" name="patientId" th:value="${appointment.patientId}" />
-            <button type="submit" class="btn-cancel">Cancel Appointment</button>
-        </form>
+        <div class="action-row">
+            <a th:href="@{/appointments/history(patientId=${appointment.patientId})}" class="btn-return">Exit to Registry</a>
+
+            <div class="cancel-form-wrapper">
+                <form th:action="@{/appointments/cancel}" method="post" onsubmit="return confirm('Confirm cancellation? This slot will instantly be made available to other dental patients.');">
+                    <input type="hidden" name="id" th:value="${appointment.appointmentId}" />
+                    <input type="hidden" name="patientId" th:value="${appointment.patientId}" />
+                    <button type="submit" class="btn-trigger-cancel">Cancel Booking</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 
