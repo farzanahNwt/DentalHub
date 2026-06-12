@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Appointment Details</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f6; margin: 40px; }
+        .card { max-width: 500px; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin: 0 auto; }
+        h2 { color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .label { font-weight: bold; color: #7f8c8d; }
+        .value { color: #2c3e50; font-weight: 500; }
+        .actions { margin-top: 25px; display: flex; justify-content: space-between; }
+        .btn-back { background: #7f8c8d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; }
+        .btn-cancel { background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-cancel:hover { background: #c0392b; }
+    </style>
+</head>
+<body>
+
+<div class="card" th:if="${appointment != null}">
+    <h2>Appointment Summary</h2>
+
+    <div class="info-row">
+        <span class="label">Appointment ID:</span>
+        <span class="value" th:text="${appointment.appointmentId}"></span>
+    </div>
+    <div class="info-row">
+        <span class="label">Date:</span>
+        <span class="value" th:text="${appointment.appointmentDate}"></span>
+    </div>
+    <div class="info-row">
+        <span class="label">Time Slot:</span>
+        <span class="value" th:text="${appointment.appointmentTime}"></span>
+    </div>
+    <div class="info-row">
+        <span class="label">Treatment Plan:</span>
+        <span class="value" th:text="${appointment.treatmentType}"></span>
+    </div>
+    <div class="info-row">
+        <span class="label">Current Status:</span>
+        <span class="value" th:text="${appointment.status}"></span>
+    </div>
+    <div class="info-row">
+        <span class="label">Notes:</span>
+        <span class="value" th:text="${appointment.notes != null && !appointment.notes.isEmpty() ? appointment.notes : 'None'}"></span>
+    </div>
+
+    <div class="actions">
+        <a th:href="@{/appointments/history(patientId=${appointment.patientId})}" class="btn-back">Back to History</a>
+
+        <form th:action="@{/appointments/cancel}" method="post" onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+            <input type="hidden" name="id" th:value="${appointment.appointmentId}" />
+            <input type="hidden" name="patientId" th:value="${appointment.patientId}" />
+            <button type="submit" class="btn-cancel">Cancel Appointment</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

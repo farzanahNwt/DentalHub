@@ -18,6 +18,7 @@ public class AppointmentController {
         this.appointmentService = appointmentService;
     }
 
+    // Matches booking.html
     @GetMapping("/book")
     public String showBookingForm(Model model) {
         model.addAttribute("appointment", new Appointment());
@@ -30,10 +31,24 @@ public class AppointmentController {
         return "redirect:/appointments/history?patientId=" + appointment.getPatientId();
     }
 
+    // FIXED: Changed from "history" to match "appointment-history" in your templates folder
     @GetMapping("/history")
     public String viewHistory(@RequestParam("patientId") Long patientId, Model model) {
         List<Appointment> history = appointmentService.getHistory(patientId);
         model.addAttribute("history", history);
-        return "history";
+        return "appointment-history";
+    }
+
+    // Matches appointment-details.html (If you create it later for your task list)
+    @GetMapping("/details")
+    public String viewDetails(@RequestParam("id") Long appointmentId, Model model) {
+        appointmentService.getAppointmentDetails(appointmentId).ifPresent(appt -> model.addAttribute("appointment", appt));
+        return "appointment-details";
+    }
+
+    @PostMapping("/cancel")
+    public String cancel(@RequestParam("id") Long appointmentId, @RequestParam("patientId") Long patientId) {
+        appointmentService.cancelAppointment(appointmentId);
+        return "redirect:/appointments/history?patientId=" + patientId;
     }
 }
