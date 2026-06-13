@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dentist Dashboard – Oraluxe</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: #f4f6f9; color: #1a1a2e; display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 168px; background: #fff; border-right: 1px solid #e8ecf0;
+      display: flex; flex-direction: column; padding: 24px 0; position: fixed;
+      top: 0; left: 0; height: 100vh; z-index: 100;
+    }
+    .sidebar-logo { padding: 0 20px 28px; }
+    .sidebar-logo .brand { font-size: 1.15rem; font-weight: 700; color: #1a1a2e; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 11px 20px; font-size: 0.88rem; color: #6b7280;
+      text-decoration: none; cursor: pointer; transition: background 0.15s, color 0.15s;
+    }
+    .nav-item:hover { background: #f0f4ff; color: #2563eb; }
+    .nav-item.active { background: #2563eb; color: #fff; border-radius: 8px; margin: 0 10px; padding: 11px 10px; }
+    .nav-item .icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    .sidebar-footer { margin-top: auto; padding: 16px 20px; border-top: 1px solid #f0f0f0; }
+    .user-info { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .user-avatar { width: 36px; height: 36px; border-radius: 50%; background: #dbeafe; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #2563eb; font-size: 0.85rem; }
+    .user-name { font-size: 0.82rem; font-weight: 600; color: #1a1a2e; }
+    .user-role { font-size: 0.72rem; color: #9ca3af; }
+    .sidebar-links a { display: block; font-size: 0.82rem; color: #6b7280; text-decoration: none; padding: 5px 0; }
+    .sidebar-links a.logout { color: #ef4444; }
+
+    /* ── Main ── */
+    .main { margin-left: 168px; flex: 1; padding: 28px 32px; }
+
+    .topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .topbar-left h1 { font-size: 1.4rem; font-weight: 700; }
+    .topbar-left p  { font-size: 0.85rem; color: #6b7280; margin-top: 4px; }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .date-badge {
+      display: flex; align-items: center; gap: 6px;
+      background: #dbeafe; color: #2563eb; border-radius: 8px;
+      padding: 7px 14px; font-size: 0.82rem; font-weight: 500;
+    }
+    .notif-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #6b7280; }
+
+    /* ── Content Grid ── */
+    .content-grid { display: grid; grid-template-columns: 1fr 260px; gap: 20px; }
+
+    /* ── Schedule ── */
+    .card { background: #fff; border-radius: 12px; padding: 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .schedule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+    .schedule-header h2 { font-size: 1rem; font-weight: 600; }
+    .view-toggle { display: flex; gap: 0; border: 1px solid #e5e7eb; border-radius: 7px; overflow: hidden; }
+    .view-btn { padding: 6px 14px; border: none; background: #fff; font-size: 0.78rem; color: #6b7280; cursor: pointer; }
+    .view-btn.active { background: #f3f4f6; color: #1a1a2e; font-weight: 600; }
+
+    /* Appointment cards */
+    .appt-card {
+      border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px;
+      margin-bottom: 12px; transition: box-shadow 0.15s;
+    }
+    .appt-card:last-child { margin-bottom: 0; }
+    .appt-card.active-session { border-color: #2563eb; background: #f8faff; }
+    .appt-card-top { display: flex; align-items: center; gap: 12px; }
+    .appt-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .av-sm { background: #6366f1; }
+    .av-jw { background: #16a34a; }
+    .av-ek { background: #6b7280; }
+
+    .appt-name { font-size: 0.92rem; font-weight: 600; }
+    .appt-service { font-size: 0.78rem; color: #6b7280; margin-top: 2px; }
+    .appt-actions { margin-left: auto; display: flex; gap: 8px; }
+    .appt-action-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e5e7eb; background: #fff; cursor: pointer; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; }
+    .appt-action-btn:hover { border-color: #2563eb; background: #f0f4ff; }
+
+    .appt-card-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+    .appt-time { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: #6b7280; }
+    .appt-time .icon { font-size: 0.82rem; }
+
+    .status-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: 600; }
+    .status-in-session { background: #dbeafe; color: #2563eb; }
+    .status-arrived    { background: #dcfce7; color: #16a34a; }
+    .status-confirmed  { background: #f3f4f6; color: #374151; }
+
+    .appt-link { font-size: 0.78rem; color: #2563eb; text-decoration: none; }
+    .appt-link:hover { text-decoration: underline; }
+
+    /* ── Right Panel ── */
+    .right-panel { display: flex; flex-direction: column; gap: 16px; }
+
+    /* Mini stat cards */
+    .mini-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mini-card { border-radius: 10px; padding: 16px; }
+    .mini-card.dark  { background: #1e40af; color: #fff; }
+    .mini-card.light { background: #fff; border: 1px solid #e5e7eb; }
+    .mini-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.8; margin-bottom: 6px; }
+    .mini-value { font-size: 2rem; font-weight: 700; }
+    .mini-sub   { font-size: 0.7rem; opacity: 0.7; margin-top: 4px; }
+    .mini-card.light .mini-label { color: #9ca3af; }
+    .mini-card.light .mini-value { color: #1a1a2e; }
+    .mini-card.light .mini-sub   { color: #9ca3af; }
+
+    .progress-bar-wrap { margin-top: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; height: 4px; }
+    .progress-bar { height: 4px; border-radius: 4px; background: #fff; }
+
+    /* Patient detail card */
+    .patient-detail-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .pd-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .pd-header h3 { font-size: 0.9rem; font-weight: 600; }
+    .pd-header a { font-size: 0.8rem; color: #2563eb; text-decoration: none; }
+    .pd-photo { width: 70px; height: 70px; border-radius: 50%; background: #e5e7eb; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 2rem; position: relative; }
+    .pd-online { width: 12px; height: 12px; background: #16a34a; border-radius: 50%; border: 2px solid #fff; position: absolute; bottom: 2px; right: 2px; }
+    .pd-name { text-align: center; font-size: 0.88rem; font-weight: 600; margin-bottom: 2px; }
+    .pd-last { text-align: center; font-size: 0.72rem; color: #9ca3af; margin-bottom: 14px; }
+    .pd-divider { border: none; border-top: 1px solid #f3f4f6; margin: 12px 0; }
+
+    .pd-section-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: #9ca3af; font-weight: 600; margin-bottom: 8px; }
+    .allergy-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .allergy-tag { padding: 3px 10px; background: #fef3c7; color: #92400e; border-radius: 20px; font-size: 0.72rem; font-weight: 500; }
+
+    .next-steps { margin-top: 12px; }
+    .next-step-item { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #374151; padding: 4px 0; }
+    .step-check { color: #2563eb; font-size: 0.9rem; }
+
+    .send-btn {
+      display: block; width: 100%; margin-top: 14px; padding: 10px;
+      background: #f3f4f6; border: none; border-radius: 8px;
+      font-size: 0.83rem; color: #6b7280; cursor: pointer; text-align: center;
+      transition: background 0.15s;
+    }
+    .send-btn:hover { background: #e5e7eb; }
+
+    /* Clinic Performance */
+    .perf-card { background: #fff; border-radius: 12px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .perf-card h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 14px; }
+    .perf-row { margin-bottom: 10px; }
+    .perf-row-top { display: flex; justify-content: space-between; font-size: 0.78rem; color: #6b7280; margin-bottom: 5px; }
+    .perf-row-top span:last-child { font-weight: 600; color: #1a1a2e; }
+    .perf-bar-bg { height: 6px; background: #f3f4f6; border-radius: 4px; }
+    .perf-bar { height: 6px; border-radius: 4px; }
+    .perf-bar.blue   { background: #2563eb; }
+    .perf-bar.yellow { background: #eab308; }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">Oraluxe</div>
+  </div>
+  <nav>
+    <a class="nav-item active" href="dentist-dashboard.html">
+      <span class="icon">⊞</span> Dashboard
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">📋</span> Appointments
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">👥</span> Patient Records
+    </a>
+    <a class="nav-item" href="#">
+      <span class="icon">⚙️</span> Settings
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">DS</div>
+      <div>
+        <div class="user-name">Dr. Smith</div>
+        <div class="user-role">Dental Surgeon</div>
+      </div>
+    </div>
+    <div class="sidebar-links">
+      <a href="#">Help Center</a>
+      <a href="index.html" class="logout">↩ Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Dashboard</h1>
+      <p id="welcomeMsg">Welcome back, Dr. Smith. You have 8 appointments today.</p>
+    </div>
+    <div class="topbar-right">
+      <button class="notif-btn">🔔</button>
+      <div class="date-badge">📅 <span id="todayDate">Oct 24, 2024</span></div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+
+    <!-- Left: Schedule -->
+    <div>
+      <div class="card">
+        <div class="schedule-header">
+          <h2>Today's Schedule</h2>
+          <div class="view-toggle">
+            <button class="view-btn active">List View</button>
+            <button class="view-btn">Timeline</button>
+          </div>
+        </div>
+
+        <div id="appointmentsList">
+          <!-- Card 1 — In Session -->
+          <div class="appt-card active-session">
+            <div class="appt-card-top">
+              <div class="appt-avatar av-sm">SM</div>
+              <div>
+                <div class="appt-name">Sarah Miller</div>
+                <div class="appt-service">Root Canal Therapy • Room 04</div>
+              </div>
+              <div class="appt-actions">
+                <button class="appt-action-btn" title="Patient info">👤</button>
+                <button class="appt-action-btn" title="Treatment">🦷</button>
+                <button class="appt-action-btn" onclick="updateStatus(1,'COMPLETED')" title="Complete">✓</button>
+              </div>
+            </div>
+            <div class="appt-card-bottom">
+              <div class="appt-time"><span class="icon">🕐</span> 09:00 AM – 10:30 AM</div>
+              <span class="status-badge status-in-session">IN-SESSION</span>
+              <a class="appt-link" href="#">View Medical History</a>
+            </div>
+          </div>
+
+          <!-- Card 2 — Arrived -->
+          <div class="appt-card">
+            <div class="appt-card-top">
+              <div class="appt-avatar av-jw">JW</div>
+              <div>
+                <div class="appt-name">James Wilson</div>
+                <div class="appt-service">Annual Checkup • Room 02</div>
+              </div>
+              <div class="appt-actions">
+                <button class="appt-action-btn">👤</button>
+                <button class="appt-action-btn">🦷</button>
+                <button class="appt-action-btn" onclick="updateStatus(2,'COMPLETED')">✓</button>
+              </div>
+            </div>
+            <div class="appt-card-bottom">
+              <div class="appt-time"><span class="icon">🕐</span> 11:00 AM – 11:30 AM</div>
+              <span class="status-badge status-arrived">ARRIVED</span>
+              <a class="appt-link" href="#">Prepare Room</a>
+            </div>
+          </div>
+
+          <!-- Card 3 — Confirmed -->
+          <div class="appt-card">
+            <div class="appt-card-top">
+              <div class="appt-avatar av-ek">EK</div>
+              <div>
+                <div class="appt-name">Emily Knight</div>
+                <div class="appt-service">Teeth Whitening • Room 01</div>
+              </div>
+              <div class="appt-actions">
+                <button class="appt-action-btn">👤</button>
+                <button class="appt-action-btn">🦷</button>
+                <button class="appt-action-btn" onclick="updateStatus(3,'COMPLETED')">✓</button>
+              </div>
+            </div>
+            <div class="appt-card-bottom">
+              <div class="appt-time"><span class="icon">🕐</span> 01:30 PM – 02:30 PM</div>
+              <span class="status-badge status-confirmed">CONFIRMED</span>
+              <a class="appt-link" href="#"></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div class="right-panel">
+
+      <!-- Mini stats -->
+      <div class="mini-stats">
+        <div class="mini-card dark">
+          <div class="mini-label">Patients Today</div>
+          <div class="mini-value" id="patientsToday">12</div>
+          <div class="mini-sub">↑ +15% from avg</div>
+        </div>
+        <div class="mini-card light">
+          <div class="mini-label">Completed</div>
+          <div class="mini-value" id="completedCount">04</div>
+          <div class="mini-sub" id="progressText">33% Progress</div>
+          <div class="progress-bar-wrap" style="background:#f3f4f6;">
+            <div class="progress-bar" style="background:#2563eb;width:33%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patient Detail -->
+      <div class="patient-detail-card">
+        <div class="pd-header">
+          <h3>Patient Detail</h3>
+          <a href="#">↗</a>
+        </div>
+        <div class="pd-photo">😊<div class="pd-online"></div></div>
+        <div class="pd-name">Sarah Miller</div>
+        <div class="pd-last">Last visit: 3 months ago</div>
+        <hr class="pd-divider"/>
+
+        <div class="pd-section-label">Known Allergies</div>
+        <div class="allergy-tags">
+          <span class="allergy-tag">Penicillin</span>
+          <span class="allergy-tag">Latex</span>
+        </div>
+
+        <div class="next-steps" style="margin-top:14px;">
+          <div class="pd-section-label">Next Steps</div>
+          <div class="next-step-item"><span class="step-check">✅</span> Fill Lower Molar</div>
+          <div class="next-step-item"><span class="step-check">✅</span> Follow-up in 2 weeks</div>
+        </div>
+
+        <button class="send-btn">Send Pre-op Instructions</button>
+      </div>
+
+      <!-- Clinic Performance -->
+      <div class="perf-card">
+        <h3>Clinic Performance</h3>
+        <div class="perf-row">
+          <div class="perf-row-top"><span>Average Session Time</span><span>42m</span></div>
+          <div class="perf-bar-bg"><div class="perf-bar blue" style="width:70%;"></div></div>
+        </div>
+        <div class="perf-row">
+          <div class="perf-row-top"><span>Room Turnaround</span><span>8m</span></div>
+          <div class="perf-bar-bg"><div class="perf-bar yellow" style="width:25%;"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:8080/api';
+  const DENTIST_ID = sessionStorage.getItem('dentistId') || 1;
+
+  // Set today's date
+  const today = new Date();
+  document.getElementById('todayDate').textContent = today.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+  async function updateStatus(appointmentId, status) {
+    try {
+      await fetch(`${API}/appointments/${appointmentId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      alert(`Appointment marked as ${status}`);
+    } catch(e) { console.log('API not available'); }
+  }
+
+  async function loadAppointments() {
+    try {
+      const res   = await fetch(`${API}/appointments/dentist/${DENTIST_ID}`);
+      const appts = await res.json();
+      const today = new Date().toISOString().split('T')[0];
+      const todayAppts = appts.filter(a => a.appointmentDate === today);
+      document.getElementById('patientsToday').textContent  = todayAppts.length;
+      document.getElementById('completedCount').textContent = appts.filter(a => a.status === 'COMPLETED').length;
+    } catch(e) { console.log('API not available, showing sample data'); }
+  }
+
+  loadAppointments();
+</script>
+</body>
+</html>
